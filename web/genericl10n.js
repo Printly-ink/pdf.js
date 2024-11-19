@@ -14,10 +14,10 @@
  */
 
 /** @typedef {import("./interfaces").IL10n} IL10n */
-import DOMLocalization from "../node_modules/@fluent/dom/esm/dom_localization.js";
+import DOMLocalization from "/node_modules/@fluent/dom/esm/dom_localization.js";
 import { fetchData } from "../src/pdf.js";
-import { FluentBundle } from "../node_modules/@fluent/bundle/esm/bundle.js";
-import { FluentResource } from "../node_modules/@fluent/bundle/esm/resource.js";
+import { FluentBundle } from "/node_modules/@fluent/bundle/esm/bundle.js";
+import { FluentResource } from "/node_modules/@fluent/bundle/esm/resource.js";
 import { L10n } from "./l10n.js";
 
 function createBundle(lang, text) {
