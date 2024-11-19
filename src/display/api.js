@@ -57,20 +57,20 @@ import {
   NodeCMapReaderFactory,
   NodeFilterFactory,
   NodeStandardFontDataFactory,
-} from "display-node_utils";
+} from "./node_utils.js";
 import { CanvasGraphics } from "./canvas.js";
 import { DOMCanvasFactory } from "./canvas_factory.js";
-import { DOMCMapReaderFactory } from "display-cmap_reader_factory";
+import { DOMCMapReaderFactory } from "./cmap_reader_factory.js";
 import { DOMFilterFactory } from "./filter_factory.js";
-import { DOMStandardFontDataFactory } from "display-standard_fontdata_factory";
+import { DOMStandardFontDataFactory } from "./standard_fontdata_factory.js";
 import { GlobalWorkerOptions } from "./worker_options.js";
 import { MessageHandler } from "../shared/message_handler.js";
 import { Metadata } from "./metadata.js";
 import { OptionalContentConfig } from "./optional_content_config.js";
 import { PDFDataTransportStream } from "./transport_stream.js";
-import { PDFFetchStream } from "display-fetch_stream";
-import { PDFNetworkStream } from "display-network";
-import { PDFNodeStream } from "display-node_stream";
+import { PDFFetchStream } from "./fetch_stream.js";
+import { PDFNetworkStream } from "./network.js";
+import { PDFNodeStream } from "./node_stream.js";
 import { TextLayer } from "./text_layer.js";
 import { XfaText } from "./xfa_text.js";
 
@@ -2400,7 +2400,7 @@ class PDFWorker {
       }
       const worker =
         typeof PDFJSDev === "undefined"
-          ? await import("pdfjs/pdf.worker.js")
+          ? await import("../pdf.worker.js")
           : await __non_webpack_import__(this.workerSrc);
       return worker.WorkerMessageHandler;
     };

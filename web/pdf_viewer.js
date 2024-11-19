@@ -36,7 +36,7 @@ import {
   PixelsPerInch,
   shadow,
   version,
-} from "pdfjs-lib";
+} from "../src/pdf.js";
 import {
   DEFAULT_SCALE,
   DEFAULT_SCALE_DELTA,
@@ -62,7 +62,7 @@ import {
   VERTICAL_PADDING,
   watchScroll,
 } from "./ui_utils.js";
-import { GenericL10n } from "web-null_l10n";
+import { GenericL10n } from "./genericl10n.js";
 import { PDFPageView } from "./pdf_page_view.js";
 import { PDFRenderingQueue } from "./pdf_rendering_queue.js";
 import { SimpleLinkService } from "./pdf_link_service.js";

@@ -15,7 +15,7 @@
 
 /** @typedef {import("./overlay_manager.js").OverlayManager} OverlayManager */
 
-import { PasswordResponses } from "pdfjs-lib";
+import { PasswordResponses } from "../src/pdf.js";
 
 /**
  * @typedef {Object} PasswordPromptOptions

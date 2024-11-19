@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { noContextMenu } from "pdfjs-lib";
+import { noContextMenu } from "../src/pdf.js";
 
 class NewAltTextManager {
   #boundCancel = this.#cancel.bind(this);

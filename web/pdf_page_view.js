@@ -31,7 +31,7 @@ import {
   RenderingCancelledException,
   setLayerDimensions,
   shadow,
-} from "pdfjs-lib";
+} from "../src/pdf.js";
 import {
   approximateFraction,
   calcRound,
@@ -44,7 +44,7 @@ import { AnnotationEditorLayerBuilder } from "./annotation_editor_layer_builder.
 import { AnnotationLayerBuilder } from "./annotation_layer_builder.js";
 import { AppOptions } from "./app_options.js";
 import { DrawLayerBuilder } from "./draw_layer_builder.js";
-import { GenericL10n } from "web-null_l10n";
+import { GenericL10n } from "./genericl10n.js";
 import { SimpleLinkService } from "./pdf_link_service.js";
 import { StructTreeLayerBuilder } from "./struct_tree_layer_builder.js";
 import { TextAccessibilityManager } from "./text_accessibility.js";

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { isPdfFile, PDFDataRangeTransport } from "pdfjs-lib";
+import { isPdfFile, PDFDataRangeTransport } from "../src/pdf.js";
 import { AppOptions } from "./app_options.js";
 import { BaseExternalServices } from "./external_services.js";
 import { BasePreferences } from "./preferences.js";

@@ -26,8 +26,8 @@
 // eslint-disable-next-line max-len
 /** @typedef {import("../src/display/struct_tree_layer_builder.js").StructTreeLayerBuilder} StructTreeLayerBuilder */
 
-import { AnnotationEditorLayer } from "pdfjs-lib";
-import { GenericL10n } from "web-null_l10n";
+import { AnnotationEditorLayer } from "../src/pdf.js";
+import { GenericL10n } from "../web/genericl10n.js";
 
 /**
  * @typedef {Object} AnnotationEditorLayerBuilderOptions

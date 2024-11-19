@@ -18,7 +18,7 @@ import {
   PixelsPerInch,
   RenderingCancelledException,
   shadow,
-} from "pdfjs-lib";
+} from "../src/pdf.js";
 import { getXfaHtmlForPrinting } from "./print_utils.js";
 
 // Creates a placeholder with div and canvas with right size for the page.
