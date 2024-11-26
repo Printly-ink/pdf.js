@@ -2864,8 +2864,8 @@ function onKeyDown(evt) {
     if (cmd === 1 || cmd === 8) {
       switch (evt.keyCode) {
         case 83: // s
-          eventBus.dispatch("download", { source: window });
-          handled = true;
+          // eventBus.dispatch("download", { source: window });
+          // handled = true;
           break;
 
         case 79: // o
