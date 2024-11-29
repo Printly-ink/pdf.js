@@ -701,7 +701,7 @@ const PDFViewerApplication = {
       fileInput.hidden = true;
       fileInput.type = "file";
       fileInput.value = null;
-      document.body.append(fileInput);
+      document.getElementById("pdfViewer").append(fileInput);
 
       fileInput.addEventListener("change", function (evt) {
         const { files } = evt.target;

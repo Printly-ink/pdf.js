@@ -82,12 +82,13 @@
 }
 
 html,
-body {
+body,
+#pdfViewer {
   height: 100%;
   width: 100%;
 }
 
-body {
+body, #pdfViewer {
   background-color: var(--body-bg-color);
   scrollbar-color: var(--scrollbar-color) var(--scrollbar-bg-color);
 }
@@ -306,13 +307,13 @@ dialog :link {
 }
 
 @media print {
-  body {
+  body, #pdfViewer {
     background: rgb(0 0 0 / 0) none;
   }
-  body[data-pdfjsprinting] #outerContainer {
+  body[data-pdfjsprinting] #outerContainer, #pdfViewer[data-pdfjsprinting] #outerContainer {
     display: none;
   }
-  body[data-pdfjsprinting] #printContainer {
+  body[data-pdfjsprinting] #printContainer, #pdfViewer[data-pdfjsprinting] #printContainer {
     display: block;
   }
   #printContainer {

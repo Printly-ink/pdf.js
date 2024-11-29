@@ -37,7 +37,7 @@ window.PDFViewerApplicationOptions = AppOptions;
 function getViewerConfiguration() {
   const mainContainer = document.getElementById("viewerContainer");
   return {
-    appContainer: document.body,
+    appContainer: document.getElementById("pdfViewer"),
     mainContainer,
     viewerContainer: document.getElementById("viewer"),
     toolbar: {

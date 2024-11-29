@@ -88,10 +88,14 @@ const FontInspector = (function FontInspectorClosure() {
     set active(value) {
       active = value;
       if (active) {
-        document.body.addEventListener("click", textLayerClick, true);
+        document
+          .getElementById("pdfViewer")
+          .addEventListener("click", textLayerClick, true);
         resetSelection();
       } else {
-        document.body.removeEventListener("click", textLayerClick, true);
+        document
+          .getElementById("pdfViewer")
+          .removeEventListener("click", textLayerClick, true);
         removeSelection();
       }
     },
