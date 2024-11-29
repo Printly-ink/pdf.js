@@ -32,6 +32,7 @@ import {
   getColorValues,
   getRGB,
   PixelsPerInch,
+  stopEvent,
 } from "../display_utils.js";
 import { HighlightToolbar } from "./toolbar.js";
 
@@ -411,6 +412,21 @@ class CommandManager {
     return this.#position < this.#commands.length - 1;
   }
 
+  cleanType(type) {
+    if (this.#position === -1) {
+      return;
+    }
+    for (let i = this.#position; i >= 0; i--) {
+      if (this.#commands[i].type !== type) {
+        this.#commands.splice(i + 1, this.#position - i);
+        this.#position = i;
+        return;
+      }
+    }
+    this.#commands.length = 0;
+    this.#position = -1;
+  }
+
   destroy() {
     this.#commands = null;
   }
@@ -501,8 +517,7 @@ class KeyboardManager {
     // For example, ctrl+s in a FreeText must be handled by the viewer, hence
     // the event must bubble.
     if (!bubbles) {
-      event.stopPropagation();
-      event.preventDefault();
+      stopEvent(event);
     }
   }
 }
@@ -1034,6 +1049,7 @@ class AnnotationEditorUIManager {
     for (const editor of this.#editorsToRescale) {
       editor.onScaleChanging();
     }
+    this.currentLayer?.onScaleChanging();
   }
 
   onRotationChanging({ pagesRotation }) {
@@ -1931,6 +1947,10 @@ class AnnotationEditorUIManager {
     }
   }
 
+  updateUIForDefaultProperties(editorType) {
+    this.#dispatchUpdateUI(editorType.defaultPropertiesToUpdate);
+  }
+
   /**
    * Add or remove an editor the current selection.
    * @param {AnnotationEditor} editor
@@ -1957,6 +1977,7 @@ class AnnotationEditorUIManager {
    * @param {AnnotationEditor} editor
    */
   setSelected(editor) {
+    this.currentLayer?.commitOrRemove();
     for (const ed of this.#selectedEditors) {
       if (ed !== editor) {
         ed.unselect();
@@ -2044,6 +2065,10 @@ class AnnotationEditorUIManager {
     });
   }
 
+  cleanUndoStack(type) {
+    this.#commandManager.cleanType(type);
+  }
+
   #isEmpty() {
     if (this.#allEditors.size === 0) {
       return true;
@@ -2063,11 +2088,16 @@ class AnnotationEditorUIManager {
    */
   delete() {
     this.commitOrRemove();
-    if (!this.hasSelection) {
+    const drawingEditor = this.currentLayer?.endDrawingSession(
+      /* isAborted = */ true
+    );
+    if (!this.hasSelection && !drawingEditor) {
       return;
     }
 
-    const editors = [...this.#selectedEditors];
+    const editors = drawingEditor
+      ? [drawingEditor]
+      : [...this.#selectedEditors];
     const cmd = () => {
       for (const editor of editors) {
         editor.remove();
@@ -2132,6 +2162,10 @@ class AnnotationEditorUIManager {
         // mustn't return here.
         return;
       }
+    }
+
+    if (this.currentLayer?.commitOrRemove()) {
+      return;
     }
 
     if (!this.hasSelection) {

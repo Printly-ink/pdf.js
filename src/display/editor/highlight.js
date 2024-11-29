@@ -28,9 +28,9 @@ import {
   HighlightAnnotationElement,
   InkAnnotationElement,
 } from "../annotation_layer.js";
+import { noContextMenu, stopEvent } from "../display_utils.js";
 import { AnnotationEditor } from "./editor.js";
 import { ColorPicker } from "./color_picker.js";
-import { noContextMenu } from "../display_utils.js";
 
 /**
  * Basic draw editor in order to generate an Highlight annotation.
@@ -749,15 +749,14 @@ class HighlightEditor extends AnnotationEditor {
     let i = 0;
     for (const { x, y, width, height } of boxes) {
       const sx = x * pageWidth + pageX;
-      const sy = (1 - y - height) * pageHeight + pageY;
-      // The specifications say that the rectangle should start from the bottom
-      // left corner and go counter-clockwise.
-      // But when opening the file in Adobe Acrobat it appears that this isn't
-      // correct hence the 4th and 6th numbers are just swapped.
+      const sy = (1 - y) * pageHeight + pageY;
+      // Serializes the rectangle in the Adobe Acrobat format.
+      // The rectangle's coordinates (b = bottom, t = top, L = left, R = right)
+      // are ordered as follows: tL, tR, bL, bR (bL origin).
       quadPoints[i] = quadPoints[i + 4] = sx;
       quadPoints[i + 1] = quadPoints[i + 3] = sy;
       quadPoints[i + 2] = quadPoints[i + 6] = sx + width * pageWidth;
-      quadPoints[i + 5] = quadPoints[i + 7] = sy + height * pageHeight;
+      quadPoints[i + 5] = quadPoints[i + 7] = sy - height * pageHeight;
       i += 8;
     }
     return quadPoints;
@@ -778,22 +777,21 @@ class HighlightEditor extends AnnotationEditor {
     const ac = new AbortController();
     const signal = parent.combinedSignal(ac);
 
-    const pointerDown = e => {
-      // Avoid to have undesired clicks during the drawing.
-      e.preventDefault();
-      e.stopPropagation();
-    };
     const pointerUpCallback = e => {
       ac.abort();
       this.#endHighlight(parent, e);
     };
     window.addEventListener("blur", pointerUpCallback, { signal });
     window.addEventListener("pointerup", pointerUpCallback, { signal });
-    window.addEventListener("pointerdown", pointerDown, {
-      capture: true,
-      passive: false,
-      signal,
-    });
+    window.addEventListener(
+      "pointerdown",
+      stopEvent /* Avoid to have undesired clicks during the drawing. */,
+      {
+        capture: true,
+        passive: false,
+        signal,
+      }
+    );
     window.addEventListener("contextmenu", noContextMenu, { signal });
 
     textLayer.addEventListener(

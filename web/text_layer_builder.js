@@ -20,7 +20,7 @@
 // eslint-disable-next-line max-len
 /** @typedef {import("./text_accessibility.js").TextAccessibilityManager} TextAccessibilityManager */
 
-import { normalizeUnicode, TextLayer } from "../src/pdf.js";
+import { normalizeUnicode, stopEvent, TextLayer } from "../src/pdf.js";
 import { removeNullCharacters } from "./ui_utils.js";
 
 /**
@@ -162,8 +162,7 @@ class TextLayerBuilder {
           removeNullCharacters(normalizeUnicode(selection.toString()))
         );
       }
-      event.preventDefault();
-      event.stopPropagation();
+      stopEvent(event);
     });
 
     TextLayerBuilder.#textLayers.set(div, end);
