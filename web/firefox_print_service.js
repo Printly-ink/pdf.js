@@ -142,7 +142,7 @@ class FirefoxPrintService {
       _printAnnotationStoragePromise,
     } = this;
 
-    const body = document.querySelector("#pdfViewer");
+    const body = document.querySelector("#pdfRoot");
     body.setAttribute("data-pdfjsprinting", true);
 
     const { width, height } = this.pagesOverview[0];
@@ -183,7 +183,7 @@ class FirefoxPrintService {
   destroy() {
     this.printContainer.textContent = "";
 
-    const body = document.querySelector("#pdfViewer");
+    const body = document.querySelector("#pdfRoot");
     body.removeAttribute("data-pdfjsprinting");
 
     if (this.pageStyleSheet) {

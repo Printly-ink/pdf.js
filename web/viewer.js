@@ -36,7 +36,7 @@ window.PDFViewerApplicationOptions = AppOptions;
 
 function getViewerConfiguration() {
   return {
-    appContainer: document.getElementById("pdfViewer"),
+    appContainer: document.getElementById("pdfRoot"),
     principalContainer: document.getElementById("mainContainer"),
     mainContainer: document.getElementById("viewerContainer"),
     viewerContainer: document.getElementById("viewer"),
@@ -271,5 +271,7 @@ if (
 export {
   AppConstants as PDFViewerApplicationConstants,
   AppOptions as PDFViewerApplicationOptions,
+  getViewerConfiguration,
   PDFViewerApplication,
+  webViewerLoad,
 };

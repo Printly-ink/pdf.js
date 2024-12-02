@@ -38,7 +38,7 @@ function download(blobUrl, filename) {
   }
   // <a> must be in the document for recent Firefox versions,
   // otherwise .click() is ignored.
-  (document.getElementById("pdfViewer") || document.documentElement).append(a);
+  (document.getElementById("pdfRoot") || document.documentElement).append(a);
   a.click();
   a.remove();
 }

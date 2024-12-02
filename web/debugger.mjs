@@ -89,12 +89,12 @@ const FontInspector = (function FontInspectorClosure() {
       active = value;
       if (active) {
         document
-          .getElementById("pdfViewer")
+          .getElementById("pdfRoot")
           .addEventListener("click", textLayerClick, true);
         resetSelection();
       } else {
         document
-          .getElementById("pdfViewer")
+          .getElementById("pdfRoot")
           .removeEventListener("click", textLayerClick, true);
         removeSelection();
       }

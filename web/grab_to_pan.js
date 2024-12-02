@@ -159,7 +159,7 @@ class GrabToPan {
     });
 
     if (!this.overlay.parentNode) {
-      document.getElementById("pdfViewer").append(this.overlay);
+      document.getElementById("pdfRoot").append(this.overlay);
     }
   }
 
