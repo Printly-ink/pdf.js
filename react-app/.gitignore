@@ -38,3 +38,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# pdfjs-build-generic
+public/build
+public/locale
+public/compressed.tracemonkey-pldi-09.pdf
