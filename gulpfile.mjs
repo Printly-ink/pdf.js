@@ -686,12 +686,9 @@ function runTests(testsName, { bot = false, xfaOnly = false } = {}) {
         if (!bot) {
           args.push("--reftest");
         } else {
-          const os = process.env.OS;
-          if (/windows/i.test(os)) {
-            // The browser-tests are too slow in Google Chrome on the Windows
-            // bot, causing a timeout, hence disabling them for now.
-            forceNoChrome = true;
-          }
+          // The browser-tests are too slow in Google Chrome on the bots,
+          // causing a timeout, hence disabling them for now.
+          forceNoChrome = true;
         }
         if (xfaOnly) {
           args.push("--xfaOnly");
@@ -770,12 +767,10 @@ function makeRef(done, bot) {
   let forceNoChrome = false;
   const args = ["test.mjs", "--masterMode"];
   if (bot) {
-    const os = process.env.OS;
-    if (/windows/i.test(os)) {
-      // The browser-tests are too slow in Google Chrome on the Windows
-      // bot, causing a timeout, hence disabling them for now.
-      forceNoChrome = true;
-    }
+    // The browser-tests are too slow in Google Chrome on the bots,
+    // causing a timeout, hence disabling them for now.
+    forceNoChrome = true;
+
     args.push("--noPrompts", "--strictVerify");
   }
   if (process.argv.includes("--noChrome") || forceNoChrome) {
@@ -1153,6 +1148,7 @@ function buildComponents(defines, dir) {
     "web/images/messageBar_*.svg",
     "web/images/toolbarButton-{editorHighlight,menuArrow}.svg",
     "web/images/cursor-*.svg",
+    "web/images/secondaryToolbarButton-documentProperties.svg",
   ];
 
   return ordered([
@@ -2250,7 +2246,7 @@ function packageJson() {
     bugs: DIST_BUGS_URL,
     license: DIST_LICENSE,
     optionalDependencies: {
-      "@napi-rs/canvas": "^0.1.62",
+      "@napi-rs/canvas": "^0.1.64",
     },
     browser: {
       canvas: false,
