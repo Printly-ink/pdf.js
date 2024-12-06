@@ -19,25 +19,3 @@ body {
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
 }
-
-/* EDITOR */
-#pdfRoot #toolbarContainer {
-  border-top: 1px solid var(--separator-color);
-}
-
-#pdfRoot .delete {
-  position: relative;
-}
-
-#pdfRoot .delete::before {
-  position: absolute;
-  top: 0;
-  left: 0;
-}
-#pdfRoot .thumbnailImage {
-  max-height: 100%;
-}
-
-#pdfRoot #thumbnailView {
-  width: 100%;
-}

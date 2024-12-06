@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import "pdfjs-build-generic/web/viewer.css";
 
 declare global {
@@ -20,6 +20,12 @@ export function usePdfViewer() {
 
     async function loadScript() {
       try {
+        const pdfjsLib = await import("pdfjs-build-generic/build/pdf.mjs");
+        // await import("pdfjs-build-generic/web/locale/locale.json");
+        await import("pdfjs-build-generic/build/pdf.worker.mjs");
+
+        window.pdfjsLib = pdfjsLib;
+
         const {
           PDFViewerApplication,
           PDFViewerApplicationOptions,
@@ -27,12 +33,13 @@ export function usePdfViewer() {
           getViewerConfiguration
         } = await import("pdfjs-build-generic/web/viewer.mjs");
 
+        window.PDFViewerApplicationOptions = PDFViewerApplicationOptions;
+        window.PDFViewerApplicationConstants = PDFViewerApplicationConstants;
         window.getViewerConfiguration = getViewerConfiguration;
         window.PDFViewerApplication = PDFViewerApplication;
-        window.PDFViewerApplicationConstants = PDFViewerApplicationConstants;
-        window.PDFViewerApplicationOptions = PDFViewerApplicationOptions;
 
         if (!window.PDFViewerApplication) return;
+
         if (!window.PDFViewerApplication.initialized) {
           const config = getViewerConfiguration();
           const event = new CustomEvent("webviewerloaded", {
@@ -62,12 +69,91 @@ export function usePdfViewer() {
   }, []);
 }
 
+// Containers
+export function PdfViewerRoot({ children }: { children: React.ReactNode }) {
+  return (
+    <>
+      {/* <link rel="resource" type="application/l10n" href="pdfjs-build-generic/web/locale/locale.json" /> */}
+      <div
+        id="pdfRoot"
+        tabIndex={0}
+        className="fixed top-0 left-0 w-full h-full bg-white z-50"
+      >
+        <div id="outerContainer">
+          {children}
+          <div id="dialogContainer">
+            <PasswordDialog />
+            <DocumentPropertiesDialog />
+            <AltTextDialog />
+            <NewAltTextDialog />
+            <AltTextSettingsDialog />
+            <PrintServiceDialog />
+          </div>
+          <EditorUndoBar />
+        </div>
+        <div id="printContainer"></div>
+      </div>
+    </>
+  );
+}
+
+export function SidebarContainer({ children }: { children: React.ReactNode }) {
+  return (
+    <div id="sidebarContainer">
+      {children}
+      <div id="sidebarResizer" />
+    </div>
+  )
+}
+
+export function MainContainer({ children }: { children: React.ReactNode }) {
+  return (
+    <div id="mainContainer">
+      {children}
+    </div>
+  )
+}
+
+export function ToolbarContainer({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="toolbar">
+      <div id="toolbarContainer">
+        { children }
+      </div>
+    </div>
+  )
+}
+interface ToolbarHorizontalGroupProps {
+  as?: "div" | "span",
+  children: React.ReactNode,
+  id?: string,
+  className?: string,
+  role?: string
+  ariaLive?: string
+}
+export function ToolbarHorizontalGroup({
+  as = "div",
+  children,
+  id,
+  className,
+  role,
+  ariaLive
+}: ToolbarHorizontalGroupProps) {
+  return (
+    React.createElement(
+      as,
+      { className: `toolbarHorizontalGroup ${className ?? ''}`, id, role, "aria-live": ariaLive },
+      children
+    )
+  )
+}
+
 // Sidebar
 export function ToolbarSidebar() {
   return (
-    <div id="toolbarSidebar" className="toolbarHorizontalGroup">
+    <ToolbarHorizontalGroup id="toolbarSidebar">
       <div id="toolbarSidebarLeft">
-        <div id="sidebarViewButtons" className="toolbarHorizontalGroup toggled" role="radiogroup">
+        <ToolbarHorizontalGroup id="sidebarViewButtons" className="toggled" role="radiogroup">
           <button id="viewThumbnail" className="toolbarButton toggled" type="button" title="Show Thumbnails" tabIndex={0} data-l10n-id="pdfjs-thumbs-button" role="radio" aria-checked="true" aria-controls="thumbnailView">
             <span data-l10n-id="pdfjs-thumbs-button-label">Thumbnails</span>
           </button>
@@ -80,19 +166,18 @@ export function ToolbarSidebar() {
           <button id="viewLayers" className="toolbarButton" type="button" title="Show Layers (double-click to reset all layers to the default state)" tabIndex={0} data-l10n-id="pdfjs-layers-button" role="radio" aria-checked="false" aria-controls="layersView">
             <span data-l10n-id="pdfjs-layers-button-label">Layers</span>
           </button>
-        </div>
+        </ToolbarHorizontalGroup>
       </div>
 
       <div id="toolbarSidebarRight">
-        <div id="outlineOptionsContainer" className="toolbarHorizontalGroup">
-          <div className="verticalToolbarSeparator"></div>
-
+        <ToolbarHorizontalGroup id="outlineOptionsContainer">
+          <VerticalToolbarSeparator />
           <button id="currentOutlineItem" className="toolbarButton" type="button" disabled title="Find Current Outline Item" tabIndex={0} data-l10n-id="pdfjs-current-outline-item-button">
             <span data-l10n-id="pdfjs-current-outline-item-button-label">Current Outline Item</span>
           </button>
-        </div>
+        </ToolbarHorizontalGroup>
       </div>
-    </div>
+    </ToolbarHorizontalGroup>
   )
 }
 
@@ -126,12 +211,12 @@ export function ViewFind() {
       <button id="viewFindButton" className="toolbarButton" type="button" title="Find in Document" tabIndex={0} data-l10n-id="pdfjs-findbar-button" aria-expanded="false" aria-controls="findbar">
         <span data-l10n-id="pdfjs-findbar-button-label">Find</span>
       </button>
-      <div className="hidden doorHanger toolbarHorizontalGroup" id="findbar">
-        <div id="findInputContainer" className="toolbarHorizontalGroup">
-          <span className="loadingInput end toolbarHorizontalGroup">
+      <ToolbarHorizontalGroup className="hidden doorHanger" id="findbar">
+        <ToolbarHorizontalGroup id="findInputContainer">
+          <ToolbarHorizontalGroup as="span" className="loadingInput end">
             <input id="findInput" className="toolbarField" title="Find" placeholder="Find in document…" tabIndex={0} data-l10n-id="pdfjs-find-input" aria-invalid="false" />
-          </span>
-          <div className="toolbarHorizontalGroup">
+          </ToolbarHorizontalGroup>
+          <ToolbarHorizontalGroup>
             <button id="findPreviousButton" className="toolbarButton" type="button" title="Find the previous occurrence of the phrase" tabIndex={0} data-l10n-id="pdfjs-find-previous-button">
               <span data-l10n-id="pdfjs-find-previous-button-label">Previous</span>
             </button>
@@ -139,10 +224,9 @@ export function ViewFind() {
             <button id="findNextButton" className="toolbarButton" type="button" title="Find the next occurrence of the phrase" tabIndex={0} data-l10n-id="pdfjs-find-next-button">
               <span data-l10n-id="pdfjs-find-next-button-label">Next</span>
             </button>
-          </div>
-        </div>
-
-        <div id="findbarOptionsOneContainer" className="toolbarHorizontalGroup">
+          </ToolbarHorizontalGroup>
+        </ToolbarHorizontalGroup>
+        <ToolbarHorizontalGroup id="findbarOptionsOneContainer">
           <div className="toggleButton toolbarLabel">
             <input type="checkbox" id="findHighlightAll" tabIndex={0} />
             <label htmlFor="findHighlightAll" data-l10n-id="pdfjs-find-highlight-checkbox">Highlight All</label>
@@ -151,8 +235,8 @@ export function ViewFind() {
             <input type="checkbox" id="findMatchCase" tabIndex={0} />
             <label htmlFor="findMatchCase" data-l10n-id="pdfjs-find-match-case-checkbox-label">Match Case</label>
           </div>
-        </div>
-        <div id="findbarOptionsTwoContainer" className="toolbarHorizontalGroup">
+        </ToolbarHorizontalGroup>
+        <ToolbarHorizontalGroup id="findbarOptionsTwoContainer">
           <div className="toggleButton toolbarLabel">
             <input type="checkbox" id="findMatchDiacritics" tabIndex={0} />
             <label htmlFor="findMatchDiacritics" data-l10n-id="pdfjs-find-match-diacritics-checkbox-label">Match Diacritics</label>
@@ -161,13 +245,12 @@ export function ViewFind() {
             <input type="checkbox" id="findEntireWord" tabIndex={0} />
             <label htmlFor="findEntireWord" data-l10n-id="pdfjs-find-entire-word-checkbox-label">Whole Words</label>
           </div>
-        </div>
-
-        <div id="findbarMessageContainer" className="toolbarHorizontalGroup" aria-live="polite">
-          <span id="findResultsCount" className="toolbarLabel"></span>
-          <span id="findMsg" className="toolbarLabel"></span>
-        </div>
-      </div>
+        </ToolbarHorizontalGroup>
+        <ToolbarHorizontalGroup id="findbarMessageContainer" ariaLive="polite">
+          <span id="findResultsCount" className="toolbarLabel" />
+          <span id="findMsg" className="toolbarLabel" />
+        </ToolbarHorizontalGroup>
+      </ToolbarHorizontalGroup>
     </div>
   )
 }
@@ -190,18 +273,18 @@ export function NextButton() {
 
 export function PageNumberGroup() {
   return (
-    <div id="pageNumberGroup" className="toolbarHorizontalGroup">
-      <span className="loadingInput start toolbarHorizontalGroup">
+    <ToolbarHorizontalGroup id="pageNumberGroup">
+      <ToolbarHorizontalGroup as="span" className="loadingInput start">
         <input type="number" id="pageNumber" className="toolbarField" title="Page" defaultValue="1" min="1" tabIndex={0} data-l10n-id="pdfjs-page-input" autoComplete="off" />
-      </span>
+      </ToolbarHorizontalGroup>
       <span id="numPages" className="toolbarLabel"></span>
-    </div>
+    </ToolbarHorizontalGroup>
   )
 }
 
 export function ZoomButtonGroup() {
   return (
-    <div id="zoomButtonGroup" className="toolbarHorizontalGroup">
+    <ToolbarHorizontalGroup id="zoomButtonGroup">
       <button id="zoomOutButton" className="toolbarButton" type="button" title="Zoom Out" tabIndex={0} data-l10n-id="pdfjs-zoom-out-button">
         <span data-l10n-id="pdfjs-zoom-out-button-label">Zoom Out</span>
       </button>
@@ -209,7 +292,7 @@ export function ZoomButtonGroup() {
       <button id="zoomInButton" className="toolbarButton" type="button" title="Zoom In" tabIndex={0} data-l10n-id="pdfjs-zoom-in-button">
         <span data-l10n-id="pdfjs-zoom-in-button-label">Zoom In</span>
       </button>
-    </div>
+    </ToolbarHorizontalGroup>
   )
 }
 
@@ -217,19 +300,19 @@ export function ScaleSelectContainer() {
   return (
     <span id="scaleSelectContainer" className="dropdownToolbarButton">
       <select id="scaleSelect" title="Zoom" tabIndex={0} data-l10n-id="pdfjs-zoom-select" defaultValue="auto">
-        <option id="pageAutoOption" title="" defaultValue="auto" data-l10n-id="pdfjs-page-scale-auto">Automatic Zoom</option>
-        <option id="pageActualOption" title="" defaultValue="page-actual" data-l10n-id="pdfjs-page-scale-actual">Actual Size</option>
-        <option id="pageFitOption" title="" defaultValue="page-fit" data-l10n-id="pdfjs-page-scale-fit">Page Fit</option>
-        <option id="pageWidthOption" title="" defaultValue="page-width" data-l10n-id="pdfjs-page-scale-width">Page Width</option>
-        <option id="customScaleOption" title="" defaultValue="custom" disabled hidden={true} data-l10n-id="pdfjs-page-scale-percent" data-l10n-args='{ "scale": 0 }'>0%</option>
-        <option title="" defaultValue="0.5" data-l10n-id="pdfjs-page-scale-percent" data-l10n-args='{ "scale": 50 }'>50%</option>
-        <option title="" defaultValue="0.75" data-l10n-id="pdfjs-page-scale-percent" data-l10n-args='{ "scale": 75 }'>75%</option>
-        <option title="" defaultValue="1" data-l10n-id="pdfjs-page-scale-percent" data-l10n-args='{ "scale": 100 }'>100%</option>
-        <option title="" defaultValue="1.25" data-l10n-id="pdfjs-page-scale-percent" data-l10n-args='{ "scale": 125 }'>125%</option>
-        <option title="" defaultValue="1.5" data-l10n-id="pdfjs-page-scale-percent" data-l10n-args='{ "scale": 150 }'>150%</option>
-        <option title="" defaultValue="2" data-l10n-id="pdfjs-page-scale-percent" data-l10n-args='{ "scale": 200 }'>200%</option>
-        <option title="" defaultValue="3" data-l10n-id="pdfjs-page-scale-percent" data-l10n-args='{ "scale": 300 }'>300%</option>
-        <option title="" defaultValue="4" data-l10n-id="pdfjs-page-scale-percent" data-l10n-args='{ "scale": 400 }'>400%</option>
+        <option id="pageAutoOption" title="" value="auto" data-l10n-id="pdfjs-page-scale-auto">Automatic Zoom</option>
+        <option id="pageActualOption" title="" value="page-actual" data-l10n-id="pdfjs-page-scale-actual">Actual Size</option>
+        <option id="pageFitOption" title="" value="page-fit" data-l10n-id="pdfjs-page-scale-fit">Page Fit</option>
+        <option id="pageWidthOption" title="" value="page-width" data-l10n-id="pdfjs-page-scale-width">Page Width</option>
+        <option id="customScaleOption" title="" value="custom" disabled hidden={true} data-l10n-id="pdfjs-page-scale-percent" data-l10n-args='{ "scale": 0 }'>0%</option>
+        <option title="" value="0.5" data-l10n-id="pdfjs-page-scale-percent" data-l10n-args='{ "scale": 50 }'>50%</option>
+        <option title="" value="0.75" data-l10n-id="pdfjs-page-scale-percent" data-l10n-args='{ "scale": 75 }'>75%</option>
+        <option title="" value="1" data-l10n-id="pdfjs-page-scale-percent" data-l10n-args='{ "scale": 100 }'>100%</option>
+        <option title="" value="1.25" data-l10n-id="pdfjs-page-scale-percent" data-l10n-args='{ "scale": 125 }'>125%</option>
+        <option title="" value="1.5" data-l10n-id="pdfjs-page-scale-percent" data-l10n-args='{ "scale": 150 }'>150%</option>
+        <option title="" value="2" data-l10n-id="pdfjs-page-scale-percent" data-l10n-args='{ "scale": 200 }'>200%</option>
+        <option title="" value="3" data-l10n-id="pdfjs-page-scale-percent" data-l10n-args='{ "scale": 300 }'>300%</option>
+        <option title="" value="4" data-l10n-id="pdfjs-page-scale-percent" data-l10n-args='{ "scale": 400 }'>400%</option>
       </select>
     </span>
   )
@@ -536,7 +619,7 @@ export function LoadingBar() {
 export function ViewerContainer() {
   return (
     <div id="viewerContainer" tabIndex={0}>
-      <div id="viewer" className="pdfViewer"></div>
+      <div id="viewer" className="pdfViewer" />
     </div>
   )
 }
@@ -544,6 +627,18 @@ export function ViewerContainer() {
 // Separators
 export function SplitToolbarButtonSeparator() {
   return <div className="splitToolbarButtonSeparator" />
+}
+
+export function HorizontalToolbarSeparator({ id, clasName }: { id?: string, clasName?: string }) {
+  return <div id={id} className={`horizontalToolbarSeparator ${clasName ?? ''}`} />
+}
+
+export function VerticalToolbarSeparator({ id, clasName }: { id?: string, clasName?: string }) {
+  return <div id={id} className={`verticalToolbarSeparator ${clasName ?? ''}`} />
+}
+
+export function ToolbarButtonSpacer() {
+  return <div className="toolbarButtonSpacer" />
 }
 
 // Dialogs
@@ -796,136 +891,131 @@ export function PrintServiceDialog() {
   )
 }
 
+export function EditorUndoBar() {
+  return (
+    <div id="editorUndoBar" className="messageBar" role="status" aria-labelledby="editorUndoBarMessage" tabIndex={-1} hidden>
+      <div>
+        <div>
+          <span id="editorUndoBarMessage" className="description"></span>
+        </div>
+        <button id="editorUndoBarUndoButton" className="undoButton" type="button" tabIndex={0} title="Undo" data-l10n-id="pdfjs-editor-undo-bar-undo-button">
+          <span data-l10n-id="pdfjs-editor-undo-bar-undo-button-label">Undo</span>
+        </button>
+        <button id="editorUndoBarCloseButton" className="closeButton" type="button" tabIndex={0} title="Close" data-l10n-id="pdfjs-editor-undo-bar-close-button">
+          <span data-l10n-id="pdfjs-editor-undo-bar-close-button-label">Close</span>
+        </button>
+      </div>
+    </div>
+  )
+}
 
 export default function PdfViewer() {
   usePdfViewer();
 
   return (
-    <>
-      <link rel="resource" type="application/l10n" href="locale/locale.json" />
-      <div
-        id="pdfRoot"
-        tabIndex={0}
-        className="fixed top-0 left-0 w-full h-full bg-white z-50"
-      >
-        <div id="outerContainer">
-          <div id="sidebarContainer">
-            <ToolbarSidebar />
-            <SidebarContent />
-            <div id="sidebarResizer"></div>
-          </div>
+    <PdfViewerRoot>
+      <SidebarContainer>
+        <ToolbarSidebar />
+        <SidebarContent />
+      </SidebarContainer>
 
-          <div id="mainContainer">
-            <div className="toolbar">
-              <div id="toolbarContainer">
-                <div id="toolbarViewer" className="toolbarHorizontalGroup">
-                  <div id="toolbarViewerLeft" className="toolbarHorizontalGroup">
-                    <SidebarToggleButton />
-                    <div className="toolbarButtonSpacer"></div>
-                    <ViewFind />
-                    <div className="toolbarHorizontalGroup hiddenSmallView">
-                      <PreviousButton />
-                      <SplitToolbarButtonSeparator />
-                      <NextButton />
-                    </div>
-                    <PageNumberGroup />
-                  </div>
-                  <div id="toolbarViewerMiddle" className="toolbarHorizontalGroup">
-                    <ZoomButtonGroup />
-                    <ScaleSelectContainer />
-                  </div>
-                  <div id="toolbarViewerRight" className="toolbarHorizontalGroup">
-                    <div id="editorModeButtons" className="toolbarHorizontalGroup" role="radiogroup">
-                      <EditorHighlight />
-                      <EditorFreeText />
-                      <EditorInk />
-                      <EditorStamp />
-                    </div>
+      <MainContainer>
+        <ToolbarContainer>
+          <ToolbarHorizontalGroup id="toolbarViewer">
+            <ToolbarHorizontalGroup id="toolbarViewerLeft">
+              <SidebarToggleButton />
+              <ToolbarButtonSpacer />
+              <ViewFind />
+              <ToolbarHorizontalGroup className="hiddenSmallView">
+                <PreviousButton />
+                <SplitToolbarButtonSeparator />
+                <NextButton />
+              </ToolbarHorizontalGroup>
+              <PageNumberGroup />
+            </ToolbarHorizontalGroup>
 
-                    <div id="editorModeSeparator" className="verticalToolbarSeparator"></div>
+            <ToolbarHorizontalGroup id="toolbarViewerMiddle">
+              <ZoomButtonGroup />
+              <ScaleSelectContainer />
+            </ToolbarHorizontalGroup>
 
-                    <div className="toolbarHorizontalGroup hiddenMediumView">
-                      <PrintButton />
-                      <DownloadButton />
-                    </div>
+            <ToolbarHorizontalGroup id="toolbarViewerRight">
+              <ToolbarHorizontalGroup id="editorModeButtons" role="radiogroup">
+                <EditorHighlight />
+                <EditorFreeText />
+                <EditorInk />
+                <EditorStamp />
+              </ToolbarHorizontalGroup>
 
-                    <div className="verticalToolbarSeparator hiddenMediumView"></div>
+              <VerticalToolbarSeparator id="editorModeSeparator" />
 
-                    <MenuDropdown>
-                      <SecondaryOpenFile />
+              <ToolbarHorizontalGroup className="hiddenMediumView">
+                <PrintButton />
+                <DownloadButton />
+              </ToolbarHorizontalGroup>
 
-                      <div className="visibleMediumView">
-                        <SecondaryPrint />
-                        <SecondaryDownload />
-                      </div>
+              <VerticalToolbarSeparator clasName="hiddenMediumView" />
 
-                      <PresentationMode />
+              <MenuDropdown>
+                <SecondaryOpenFile />
 
-                      <ViewBookmark />
-
-                      <div id="viewBookmarkSeparator" className="horizontalToolbarSeparator" />
-
-                      <FirstPageButton />
-                      <LastPageButton />
-
-                      <div className="horizontalToolbarSeparator" />
-
-                      <PageRotateCwButton />
-                      <PageRotateCcwButton />
-
-                      <div className="horizontalToolbarSeparator"></div>
-
-                      <div id="cursorToolButtons" role="radiogroup">
-                        <CursorSelectToolButton />
-                        <CursorHandToolButton />
-                      </div>
-
-                      <div className="horizontalToolbarSeparator"></div>
-
-                      <div id="scrollModeButtons" role="radiogroup">
-                        <ScrollPageButton />
-                        <ScrollVerticalButton />
-                        <ScrollHorizontalButton />
-                        <ScrollWrappedButton />
-                      </div>
-
-                      <div className="horizontalToolbarSeparator"></div>
-
-                      <div id="spreadModeButtons" role="radiogroup">
-                        <SpreadNoneButton />
-                        <SpreadOddButton />
-                        <SpreadEvenButton />
-                      </div>
-
-                      <div id="imageAltTextSettingsSeparator" className="horizontalToolbarSeparator hidden" />
-
-                      <ImageAltTextSettingsButton />
-
-                      <div className="horizontalToolbarSeparator" />
-
-                      <DocumentPropertiesButton />
-                    </MenuDropdown>
-
-                  </div>
+                <div className="visibleMediumView">
+                  <SecondaryPrint />
+                  <SecondaryDownload />
                 </div>
-                <LoadingBar />
-              </div>
-            </div>
 
-            <ViewerContainer />
-          </div>
+                <PresentationMode />
 
-          <div id="dialogContainer">
-            <PasswordDialog />
-            <DocumentPropertiesDialog />
-            <AltTextDialog />
-            <NewAltTextDialog />
-            <AltTextSettingsDialog />
-            <PrintServiceDialog />
-          </div>
-        </div>
-        <div id="printContainer"></div>
-      </div>
-    </>
+                <ViewBookmark />
+
+                <HorizontalToolbarSeparator id="viewBookmarkSeparator" />
+
+                <FirstPageButton />
+                <LastPageButton />
+
+                <HorizontalToolbarSeparator />
+
+                <PageRotateCwButton />
+                <PageRotateCcwButton />
+
+                <HorizontalToolbarSeparator />
+
+                <div id="cursorToolButtons" role="radiogroup">
+                  <CursorSelectToolButton />
+                  <CursorHandToolButton />
+                </div>
+
+                <HorizontalToolbarSeparator />
+
+                <div id="scrollModeButtons" role="radiogroup">
+                  <ScrollPageButton />
+                  <ScrollVerticalButton />
+                  <ScrollHorizontalButton />
+                  <ScrollWrappedButton />
+                </div>
+
+                <HorizontalToolbarSeparator />
+
+                <div id="spreadModeButtons" role="radiogroup">
+                  <SpreadNoneButton />
+                  <SpreadOddButton />
+                  <SpreadEvenButton />
+                </div>
+
+                <HorizontalToolbarSeparator id="imageAltTextSettingsSeparator" clasName="hidden" />
+
+                <ImageAltTextSettingsButton />
+
+                <HorizontalToolbarSeparator />
+
+                <DocumentPropertiesButton />
+              </MenuDropdown>
+            </ToolbarHorizontalGroup>
+          </ToolbarHorizontalGroup>
+          <LoadingBar />
+        </ToolbarContainer>
+        <ViewerContainer />
+      </MainContainer>
+    </PdfViewerRoot>
   );
 }
