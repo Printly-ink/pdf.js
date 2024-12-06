@@ -6,14 +6,13 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "postinstall": "cp -r node_modules/pdfjs-build-generic/web/locale public/locale && cp -r node_modules/pdfjs-build-generic/build/pdf.worker.mjs public/build/pdf.worker.mjs && cp node_modules/pdfjs-build-generic/web/compressed.tracemonkey-pldi-09.pdf public/compressed.tracemonkey-pldi-09.pdf"
+    "lint": "next lint"
   },
   "dependencies": {
     "next": "15.0.3",
     "pdfjs-dist": "^4.8.69",
-    "react": "19.0.0-rc-66855b96-20241106",
-    "react-dom": "19.0.0-rc-66855b96-20241106"
+    "react": "^18",
+    "react-dom": "^18"
   },
   "devDependencies": {
     "@types/node": "^20",
